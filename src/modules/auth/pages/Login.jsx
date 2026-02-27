@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "@/services/api";
 import AuthCard from "../components/AuthCard";
 import AuthForm from "../components/AuthForm";
 
-export default function Login() {
+export default function ManagementLogin() {
   const navigate = useNavigate();
-  const { portal } = useParams(); // get portal from URL
+  const portal = "MANAGEMENT"; 
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,16 +16,11 @@ export default function Login() {
     setError("");
 
     try {
-      // Validate portal
-      if (!portal) throw new Error("Invalid login route");
-
       const response = await api.post(`/auth/login/${portal}`, { email, password });
-
       const { accessToken, user } = response.data || {};
 
       if (!accessToken || !user?.role) throw new Error("Invalid response from server");
 
-      // Store token + role
       localStorage.setItem("authToken", accessToken);
       localStorage.setItem("authRole", user.role);
 
@@ -51,10 +46,7 @@ export default function Login() {
   };
 
   return (
-    <AuthCard
-      title={`Welcome back ${portal ? `(${portal})` : ""}`}
-      description="Sign in to manage your restaurant operations."
-    >
+    <AuthCard title="Welcome back" description="Sign in to manage your restaurant operations.">
       <AuthForm
         type="login"
         onSubmit={handleLogin}
@@ -62,23 +54,17 @@ export default function Login() {
         error={error}
         submitLabel="Sign in"
         footer={
-          portal === "customer" && (
-            <>
-              <span>Don&apos;t have an account? </span>
-              <Link
-                to="/customer/register"
-                className="font-medium text-[#C3110C] hover:underline"
-              >
-                Sign up as customer
-              </Link>
-            </>
-          )
+          <span>
+            Don&apos;t have an account?{" "}
+            <Link to="/customer/register" className="font-medium text-[#C3110C] hover:underline">
+              Sign up as customer
+            </Link>
+          </span>
         }
       />
 
       <p className="mt-4 text-xs text-neutral-400">
-        Only customers can register. Staff (waiter, chef, manager, owner)
-        should use their assigned credentials to login.
+        Only customers can register. Staff (waiter, chef, manager, owner) should use their assigned credentials.
       </p>
     </AuthCard>
   );
